@@ -1,6 +1,6 @@
 """ 
-    Deploy Llama2-70B-chat chat in Vertex AI using Uvicorn server
-    The deployment uses a g2-standard-24 machine type with 2xL4 GPU
+    FastAPI app that serves AIP_PREDICT_ROUTE and hosts a Llama 2 70B model stored locally and downloaded from GCS
+    Healthcheck at AIP_HEALTH_ROUTE
 """
 
 import os

@@ -1,5 +1,5 @@
 """ 
-    Deploy Llama2-70B-chat chat in Vertex AI using Uvicorn server
+    Deploy image with Uvicorn server containing FastAPI app and a Llama2-70B-chat model in Vertex AI
     The deployment uses a g2-standard-24 machine type with 2xL4 GPU
 """
     
@@ -29,7 +29,6 @@ model = Model(model.resource_name)
 endpoint = model.deploy(
     machine_type="g2-standard-24",
     accelerator_type="NVIDIA_L4",
-    #service_account="cloud-run-llm@argolis-rafaelsanchez-ml-dev.iam.gserviceaccount.com",
     accelerator_count=2,
     traffic_split={"0": 100}, 
     min_replica_count=1,

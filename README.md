@@ -1,4 +1,4 @@
-#  Deploy Llama 2 70B on Vertex AI Prediction with GPTQ
+1#  Deploy Llama 2 70B on Vertex AI Prediction with GPTQ
 
 This code shows how to **deploy a Llama 2 chat model** (70B parameters) in Vertex AI Prediction with a 2xL4 GPU. The model will be downloaded and embedded in a custom prediction image, using an [Uvicorn](https://www.uvicorn.org/) server. You will use a `g2-standard-24` machine type with 2xL4 NVidia GPU in **Vertex AI Prediction**.
 
@@ -30,7 +30,7 @@ A Custom Container image for predictions is required. A Custom Container image i
 You will use a [Uvicorn](https://www.uvicorn.org/) server. You must build and push the container image to [Artifact Registry](https://cloud.google.com/artifact-registry):
 ```sh
 gcloud auth configure-docker europe-west4-docker.pkg.dev
-gcloud builds submit --tag europe-west4-docker.pkg.dev/argolis-rafaelsanchez-ml-dev/ml-pipelines-repo/llama2-70b-chat --machine-type=e2-highcpu-8 --timeout="2h" --disk-size=300 && python3.10 upload_custom.py 
+gcloud builds submit --tag europe-west4-docker.pkg.dev/argolis-rafaelsanchez-ml-dev/ml-pipelines-repo/llama2-70b-chat --machine-type=e2-highcpu-8 --timeout="2h" --disk-size=300
 ```
 
 This build process should take **2-3 hours**  with a `e2-highcpu-8`.
