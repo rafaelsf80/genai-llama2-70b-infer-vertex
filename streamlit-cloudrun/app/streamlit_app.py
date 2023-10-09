@@ -1,5 +1,6 @@
 """ 
     Streamlit App that calls Vertex AI prediction endpoint
+    Must run with: "streamlit run streamlit_app.py", not with "python3 streamlit_app.py"
 """
 
 from PIL import Image
@@ -20,10 +21,10 @@ st.set_page_config(page_title="Llama 2-70B Chat deployed as Streamlit app")
 
 # Sidebar contents
 with st.sidebar:
-    st.title('💬 Llama 2 70B chat in Vertex AI')
+    st.title('💬 Llama 2 70B chat')
     st.markdown('''
     ## About
-    This app is an LLM-powered chatbot built using:
+    This app is an LLM-powered chatbot built using Vertex AI Prediction:
     - [Streamlit](https://streamlit.io/)
     - [Vertex AI](https://cloud.google.com/vertex-ai)
     - [Llama-2 70B chat](https://ai.meta.com/llama/) LLM model
@@ -65,8 +66,10 @@ def inference(text):
   response = endpoint.predict([[str(text)]])
   print(response)
   print("separo")
-  print(response.predictions[0])
-  return str(response.predictions[0])
+  #print(response.predictions[0])
+  print((response.predictions[0]).split("[/INST]",1)[1])
+  # Only shows after "[/INST]"
+  return str((response.predictions[0]).split("[/INST]",1)[1])
 
 
 ## Conditional display of AI generated responses as a function of user provided prompts

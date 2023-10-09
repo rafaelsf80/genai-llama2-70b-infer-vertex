@@ -6,11 +6,6 @@
 from google.cloud.aiplatform import Model, Endpoint
 
 DEPLOY_IMAGE="europe-west4-docker.pkg.dev/argolis-rafaelsanchez-ml-dev/ml-pipelines-repo/llama2-70b-chat"
-ARTIFACT_URI="gs://argolis-rafaelsanchez-llm-models/llama-2-chat-70b-gptq"
-
-#!docker build -t $deploy_image_uri -f Dockerfile .
-#!docker push $deploy_image_uri
-
 HEALTH_ROUTE = "/health"
 PREDICT_ROUTE = "/predict"
 SERVING_CONTAINER_PORTS = [7080]
@@ -22,7 +17,6 @@ model = Model.upload(
     serving_container_predict_route=PREDICT_ROUTE,
     serving_container_health_route=HEALTH_ROUTE,
     serving_container_ports=SERVING_CONTAINER_PORTS,
-    #artifact_uri=ARTIFACT_URI,
     location="europe-west4",
     upload_request_timeout=1800,
     sync=True,
@@ -45,5 +39,3 @@ endpoint = model.deploy(
     sync=True,
 )
 endpoint.wait()
-
-

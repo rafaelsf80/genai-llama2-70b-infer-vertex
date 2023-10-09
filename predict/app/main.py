@@ -1,32 +1,27 @@
+""" 
+    Deploy Llama2-70B-chat chat in Vertex AI using Uvicorn server
+    The deployment uses a g2-standard-24 machine type with 2xL4 GPU
+"""
 
 import os
 import shutil
 import logging
 
 from tqdm import tqdm
-from google.cloud import storage
-from google.cloud import aiplatform
 from fastapi import FastAPI, Request
 from fastapi.logger import logger
 
-
 from starlette.responses import JSONResponse
-from transformers import AutoTokenizer, pipeline, logging
+from transformers import AutoTokenizer, pipeline
 from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
 
 import torch
 
-
-app = FastAPI()
-
-PROJECT_ID = "argolis-rafaelsanchez-ml-dev"
-AIP_PROJECT_NUMBER=os.getenv("AIP_PROJECT_NUMBER", "989788194604")
+LOCAL_MODEL_DIR = '../llama2-70b-chat-gptq'
 AIP_PREDICT_ROUTE=os.getenv("AIP_PREDICT_ROUTE", "/predict")
 AIP_HEALTH_ROUTE=os.getenv("AIP_HEALTH_ROUTE", "/health")
-AIP_STORAGE_URI=os.getenv("AIP_STORAGE_URI", "gs://argolis-rafaelsanchez-llm-models/llama-2-chat-70b-gptq")
-LOCAL_MODEL_DIR="llama-2-chat-70b-gptq/"
 
-
+app = FastAPI()
 
 gunicorn_logger = logging.getLogger('gunicorn.error')
 logger.handlers = gunicorn_logger.handlers
@@ -37,32 +32,11 @@ else:
     logger.setLevel(logging.INFO)
 
 logger.info(f"Is CUDA available: {torch.cuda.is_available()}")
+
 logger.info(f"CUDA device: {torch.cuda.get_device_name(torch.cuda.current_device())}")
-
-
 
 logger.info(AIP_HEALTH_ROUTE)
 logger.info(AIP_PREDICT_ROUTE)
-
-#os.mkdir(LOCAL_MODEL_DIR)
-
-# aiplatform.init(project=PROJECT_ID)
-
-# storage_client = storage.Client(AIP_PROJECT_NUMBER)
-# bucket = storage_client.bucket(AIP_STORAGE_URI.split("/")[2])
-# blobs = bucket.list_blobs(prefix=AIP_STORAGE_URI.split("/")[3])
-# for blob in blobs:
-#     logger.info(f"Free Disk: {shutil.disk_usage(__file__)[2]/1024/1024/1024}")
-#     logger.info(blob.name.split("/")[-1])
-#     if blob.name.split("/")[-1] != "":
-#         filename = blob.name.split("/")[-1]
-#         with open(LOCAL_MODEL_DIR+filename, "wb") as in_file:
-#             with tqdm.wrapattr(in_file, "write", total=blob.size, miniters=1, desc="Downloading") as destination_file_name:
-#                 storage_client.download_blob_to_file(blob, destination_file_name) 
-
-
-LOCAL_MODEL_DIR = '../llama2-70b-chat-gptq'
-
 
 logger.info(f"Loading model {LOCAL_MODEL_DIR}. This takes some time ...")
 
@@ -80,7 +54,6 @@ model = AutoGPTQForCausalLM.from_quantized(LOCAL_MODEL_DIR,
         )
 
 logger.info(f"Loading model DONE")
-
 
     
 @app.get(AIP_HEALTH_ROUTE, status_code=200)
@@ -104,10 +77,3 @@ async def predict(request: Request, status_code=200):
     response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
     return JSONResponse({"predictions": response})
-
-
-
-
-# curl -X GET \
-#     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-#     "https://europe-west4-aiplatform.googleapis.com/v1/projects/989788194604/locations/europe-west4/endpoints/7034662200371314688/operations/6857616913921474560"

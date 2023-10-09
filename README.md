@@ -2,7 +2,7 @@
 
 This code shows how to **deploy a Llama 2 chat model** (70B parameters) in Vertex AI Prediction with a 2xL4 GPU. The model will be downloaded and embedded in a custom prediction image, using an [Uvicorn](https://www.uvicorn.org/) server. You will use a `g2-standard-24` machine type with 2xL4 NVidia GPU in **Vertex AI Prediction**.
 
-The model is quantized at 4-bits using GPTQ.
+The model is quantized at 4-bits using [GPTQ](https://arxiv.org/abs/2210.17323).
 
 A demo based on [Streamlit](https://streamlit.io/) and deployed in [Cloud Run](https://cloud.google.com/run) is also provided to easily make requests into the deployed model.
 
@@ -20,6 +20,8 @@ Main features of this model are:
 
 Model card [here](https://github.com/facebookresearch/llama/blob/main/MODEL_CARD.md) and paper [here](https://arxiv.org/abs/2307.09288).
 
+Here the model to be downloaded from [Hugging Face](https://huggingface.co/TheBloke/Llama-2-70B-chat-GPTQ/tree/main). 
+
 
 ## Build Custom Prediction Container image 
 
@@ -31,14 +33,14 @@ gcloud auth configure-docker europe-west4-docker.pkg.dev
 gcloud builds submit --tag europe-west4-docker.pkg.dev/argolis-rafaelsanchez-ml-dev/ml-pipelines-repo/llama2-70b-chat --machine-type=e2-highcpu-8 --timeout="2h" --disk-size=300 && python3.10 upload_custom.py 
 ```
 
-This build process should take **less than 20 minutes**  with a `e2-highcpu-8`.
+This build process should take **2-3 hours**  with a `e2-highcpu-8`.
 
 
 ## Deploy the model to Vertex AI Prediction
 
 Upload and deploy the image to Vertex AI Prediction using the provided script: `python3 upload_custom.py`. 
 
-The upload and deploy process **may take up to 45 min**. Note the parameter `deploy_request_timeout` to avoid a `504 Deadline Exceeded` error during the deployment:
+The upload and deploy process **may take up to 30 min**. Note the parameter `deploy_request_timeout` to avoid a `504 Deadline Exceeded` error during the deployment:
 ```python
 model = Model.upload(
     display_name="llama2-70B-chat", 
@@ -47,7 +49,6 @@ model = Model.upload(
     serving_container_predict_route=PREDICT_ROUTE,
     serving_container_health_route=HEALTH_ROUTE,
     serving_container_ports=SERVING_CONTAINER_PORTS,
-    artifact_uri=ARTIFACT_URI,
     location="europe-west4",
     upload_request_timeout=1200,
     sync=True,
@@ -71,7 +72,7 @@ endpoint = model.deploy(
 endpoint.wait()
 ```
 
-The [cost of a Vertex Prediction endpoint](https://cloud.google.com/vertex-ai/pricing#prediction-prices) (24x7) is splitted between **vCPU cost** (measured in vCPU hours), **RAM cost** (measured in GB hours) and **GPU cost** (measured in hours). In this case, we will use a `g2-standard-24` with `2xL4 GPU` in `europe-west4` and the estimated cost is `(XXXX + YYYY*4 + ZZZZ*16)*24*30 = AAAAAA USD per month`.
+The [cost of a Vertex Prediction endpoint](https://cloud.google.com/vertex-ai/pricing#prediction-prices) (24x7) for a `g2-standard-24` machine is calculated in node hours, considering **vCPU cost** (measured in vCPU hours) and **RAM cost** (measured in GB hours). In this case, a `g2-standard-24` has a node hour for `europe-west4` of `USD 2.5338 per hour ` and the estimated total cost including 2xL4 GPUs is `(2.5338*24 + 2.5338*96)*24*30 = 304 USD per month`.
 
 
 ## Streamlit demo UI
