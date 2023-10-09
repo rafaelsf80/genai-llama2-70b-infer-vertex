@@ -89,7 +89,7 @@ gcloud run deploy llama2-70b-chat-streamlit --port 8501 --image europe-west4-doc
 
 The Streamlit app is now deployed in Cloud Run. You can test the provided examples ot try yours. Please, note the purpose of this post is not to evaluate the performance of the Llama 2-7B chat model, but to show how to deploy a model like this in Vertex AI and Cloud Run. You may get better results with higher quantized versions or bigger models like Llama 2-13B.
 
-![Streamlit app](images/streamlit_app.png)
+![Streamlit app](images/streamlit_app_new.png)
 
 
 ## References
